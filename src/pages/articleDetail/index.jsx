@@ -18,7 +18,7 @@ const ArticleDetail = memo(() => {
     } catch (error) {
       Taro.redirectTo({
         url: "/pages/login/index",
-      });
+      }); 
     }
     const content = router.params.id;
     Taro.request({

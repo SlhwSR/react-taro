@@ -11,6 +11,9 @@ import {
   AtListItem,
   AtTabs,
   AtTabsPane,
+  AtIcon,
+  AtActionSheet,
+  AtActionSheetItem,
 } from "taro-ui";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
@@ -20,7 +23,9 @@ const Personal = memo(() => {
   const [currentTab, setCurrentTab] = useState(0); //tab切换
   const [categoryList, setCategoryList] = useState([]);
   const [articleList, setArticleList] = useState([]);
+  const [commentList, setCommentList] = useState([]);
   const [total, setTotal] = useState(0);
+  const [sheet, setSheet] = useState(false);
   const handleClose = () => {
     console.log("--------");
     setOpen(false);
@@ -69,9 +74,52 @@ const Personal = memo(() => {
           setTotal(res.data.total);
           // setCategoryList(res.data.category);
         });
+        break;
+      case 1:
+        Taro.request({
+          url: `http://localhost:3000/api/article`,
+          method: "GET",
+          data: {
+            current: 1,
+            pageSize: 10,
+          },
+          header: {
+            authorization: "Bearer " + token,
+          },
+        }).then((res) => {
+          console.log(res.data);
+          setArticleList(res.data.data);
+          setTotal(res.data.total);
+          // setCategoryList(res.data.category);
+        });
+        break;
+      case 2:
+        Taro.request({
+          url: `http://localhost:3000/api/user/comment/${userinfo.id}`,
+          method: "GET",
+          header: {
+            authorization: "Bearer " + token,
+          },
+        }).then((res) => {
+          console.log(res.data);
+          setCommentList(res.data?.data?.comments);
+          // setArticleList(res.data.data);
+          // setTotal(res.data.total);
+          // setCategoryList(res.data.category);
+        });
+        break;
       default:
         break;
     }
+  };
+  const quit = () => {
+    Taro.setStorage({
+      key: "token",
+      data: null,
+    });
+    Taro.redirectTo({
+      url: "/pages/login/index",
+    });
   };
   useEffect(() => {
     Taro.request({
@@ -93,6 +141,20 @@ const Personal = memo(() => {
           style={{ marginLeft: "75%" }}
         ></AtAvatar>
       </View>
+      <div
+        style={{
+          marginLeft: "48%",
+          // backgroundColor: "red",
+          overflow: "hidden",
+        }}
+      >
+        <AtIcon
+          value="menu"
+          size="15"
+          color="rgb(153, 153, 153)"
+          onClick={() => setSheet(true)}
+        ></AtIcon>
+      </div>
       <View style={{ marginLeft: "36%", marginTop: "15px" }}>
         <Text>{userinfo?.email}</Text>
       </View>
@@ -142,10 +204,10 @@ const Personal = memo(() => {
             title: "我的文章",
           },
           {
-            title: "我的点赞",
+            title: "我的评论",
           },
           {
-            title: "我的收藏",
+            title: "我的视频",
           },
         ]}
         onClick={(e) => {
@@ -175,9 +237,7 @@ const Personal = memo(() => {
                 title={item.title}
                 onClick={() => {
                   Taro.navigateTo({
-                    url:
-                      "/pages/articleDetail/index?id=" +
-                      item.id,
+                    url: "/pages/articleDetail/index?id=" + item.id,
                   });
                 }}
                 // thumb={item.cover.replace(/\\/g, "/")}
@@ -191,9 +251,24 @@ const Personal = memo(() => {
           </AtList>
         </AtTabsPane>
         <AtTabsPane current={currentTab} index={2}>
-          <View style="padding: 100px 50px;background-color: #FAFBFC;text-align: center;">
-            标签页三的内容
-          </View>
+          <AtList>
+            {(commentList || []).map((item, index) => (
+              <AtListItem
+                title={item.content}
+                // onClick={() => {
+                //   Taro.navigateTo({
+                //     url: "/pages/articleDetail/index?id=" + item.id,
+                //   });
+                // }}
+                // thumb={item.cover.replace(/\\/g, "/")}
+                note={
+                  "时间:" + dayjs(item.createAt).format("YYYY-MM-DD:hh:mm:ss")
+                }
+                extraText={"用户" + userinfo?.email}
+                arrow="right"
+              ></AtListItem>
+            ))}
+          </AtList>
         </AtTabsPane>
         <AtTabsPane current={currentTab} index={3}>
           <View style="padding: 100px 50px;background-color: #FAFBFC;text-align: center;">
@@ -201,6 +276,14 @@ const Personal = memo(() => {
           </View>
         </AtTabsPane>
       </AtTabs>
+      <AtActionSheet
+        isOpened={sheet}
+        onCancel={() => setSheet(false)}
+        onClose={() => setSheet(false)}
+      >
+        <AtActionSheetItem>修改密码</AtActionSheetItem>
+        <AtActionSheetItem onClick={quit}>退出登录</AtActionSheetItem>
+      </AtActionSheet>
     </div>
   );
 });

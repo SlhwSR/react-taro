@@ -23,6 +23,10 @@ const Index = () => {
       var token = Taro.getStorageSync("token");
       if (token) {
         console.log(token);
+      }else{
+        Taro.redirectTo({
+          url:"/pages/login/index"
+        })
       }
       // console.log(token);
     } catch (error) {

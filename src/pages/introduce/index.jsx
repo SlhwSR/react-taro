@@ -13,8 +13,6 @@ const Introduce = memo(() => {
   }, []);
   return (
     <>
-      <Text>Introduce Info</Text>
-      {/* <View className='at-icon at-icon-settings'></View> */}
       {(medicalGoods || []).map((item) => (
         <span key={item.name}>{item.name}</span>
       ))}
