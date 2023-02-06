@@ -24,6 +24,7 @@ const Personal = memo(() => {
   const [categoryList, setCategoryList] = useState([]);
   const [articleList, setArticleList] = useState([]);
   const [commentList, setCommentList] = useState([]);
+  const [video, setVideo] = useState([]);
   const [total, setTotal] = useState(0);
   const [sheet, setSheet] = useState(false);
   const handleClose = () => {
@@ -75,24 +76,6 @@ const Personal = memo(() => {
           // setCategoryList(res.data.category);
         });
         break;
-      case 1:
-        Taro.request({
-          url: `http://localhost:3000/api/article`,
-          method: "GET",
-          data: {
-            current: 1,
-            pageSize: 10,
-          },
-          header: {
-            authorization: "Bearer " + token,
-          },
-        }).then((res) => {
-          console.log(res.data);
-          setArticleList(res.data.data);
-          setTotal(res.data.total);
-          // setCategoryList(res.data.category);
-        });
-        break;
       case 2:
         Taro.request({
           url: `http://localhost:3000/api/user/comment/${userinfo.id}`,
@@ -106,6 +89,18 @@ const Personal = memo(() => {
           // setArticleList(res.data.data);
           // setTotal(res.data.total);
           // setCategoryList(res.data.category);
+        });
+        break;
+      case 3:
+        Taro.request({
+          url: `http://localhost:3000/api/video/PersonalVideo/${userinfo.id}`,
+          method: "GET",
+          header: {
+            authorization: "Bearer " + token,
+          },
+        }).then((res) => {
+          console.log(res.data);
+          setVideo(res.data.data);
         });
         break;
       default:
@@ -271,9 +266,22 @@ const Personal = memo(() => {
           </AtList>
         </AtTabsPane>
         <AtTabsPane current={currentTab} index={3}>
-          <View style="padding: 100px 50px;background-color: #FAFBFC;text-align: center;">
-            标签页三的内容
-          </View>
+          <AtList>
+            {(video || []).map((item, index) => (
+              <AtListItem
+                title={"分类:" + item.name}
+                onClick={() => {
+                  Taro.navigateTo({
+                    url: "/pages/videoDetail/index?id=" + item.id,
+                  });
+                }}
+                // thumb={item.cover.replace(/\\/g, "/")}
+                note={"作者:" + userinfo.email}
+                extraText={"共" + item.videos.length + "条"}
+                arrow="right"
+              ></AtListItem>
+            ))}
+          </AtList>
         </AtTabsPane>
       </AtTabs>
       <AtActionSheet

@@ -1,4 +1,4 @@
-import { Text, View } from "@tarojs/components";
+import { Map, Text, View } from "@tarojs/components";
 import { useLaunch, useReady } from "@tarojs/taro";
 import React, { memo, useEffect } from "react";
 import { useLayoutEffect } from "react";
@@ -11,11 +11,12 @@ const Introduce = memo(() => {
   useEffect(() => {
     console.log(medicalGoods);
   }, []);
+  const ontap = (e) => {
+    console.log(e);
+  };
   return (
     <>
-      {(medicalGoods || []).map((item) => (
-        <span key={item.name}>{item.name}</span>
-      ))}
+      <Map onClick={ontap} longitude={68.9} latitude={50}></Map>
     </>
   );
 });
